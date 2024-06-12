@@ -36,9 +36,11 @@ def main(
         max_batch_size=max_batch_size,
     )
 
-    system_instruction_1 = "You are a professional fact checker. You will be provided with a claim and some evidences related to the claim. Your task is to classify the claim into the following three labels: Supported, Refuted, or Unsure. You need to first analyze the given the claim and the evidences as a fact checker, and then derive the classification decision based on your analysis. Your final classification decision should solely rely on the claim and the evidences provided, but not the pre-trained knowledge you have learned. \nNote that the original label space is very large, so we grouped all the original labels into Supported, Refuted, and Unsure based on the following guidelines: \n1. We grouped labels like 'mostly true', 'partially true' into 'Supported'. Here is all the original labels mapped to 'Supported': 'a little baloney', 'accurate', 'authorship confirmed!', 'conclusion: accurate', 'confirmed authorship!', 'correct', 'correct attribution', 'correct attribution!', 'determination: mostly true', 'determination: true', 'fact', 'factscan score: true', 'half true', 'half-true', 'in-the-green', 'mostly true', 'mostly truth!', 'mostly-correct', 'mostly_true', 'no flip', 'outdated', 'partially true', 'partly true', 'true', 'truth!', 'verdict: true', 'verified'.\n2. We grouped labels like 'mostly false', 'partially false' into 'Refuted'. Here is all the original labels mapped to 'Refuted': 'a lot of baloney', 'cherry picks', 'conclusion: false', 'determination: barely true', 'determination: false', 'determination: huckster propaganda', 'determination: misleading', 'disputed!', 'distorts the facts', 'exaggerated', 'exaggerates', 'factscan score: false', 'factscan score: misleading', 'fake', 'false', 'fiction', 'fiction!', 'full flop', 'half flip', 'in-the-red', 'inaccurate attribution!', 'incorrect', 'incorrect attribution!', 'legend', 'misattributed', 'miscaptioned', 'misleading', 'misleading!', 'mixture', 'mostly false', 'mostly fiction!', 'mostly_false', 'not the whole story', 'pants on fire!', 'scam', 'scam!', 'some baloney', 'spins the facts', 'understated', 'unsupported', 'verdict: false', 'we rate this claim false'\n3. Here is all the labels mapped to 'Unsure': 'conclusion: unclear', 'in-between', 'no evidence', 'unobservable', 'unproven', 'unproven!', 'unverified', 'verdict: unsubstantiated'. \n I will ask you to output in two rounds. In the first round, you need to output the process of analyzing the claim and the evidences as a fact checker, and in the second round, you need to output the final classification decision based on your analysis. Now, this is the first round. Please analyze the claim and the evidences as a fact checker and output the process of your analysis."
+    system_instruction_1 = "You are a professional fact checker. You will be provided with a claim and some evidences related to the claim. Your task is to classify the claim into the following three labels: Supported, Refuted, or Unsure. You need to first analyze the given the claim and the evidences as a fact checker, and then derive the classification decision based on your analysis. Your final classification decision should solely rely on the claim and the evidences provided, but not the pre-trained knowledge you have learned. \nNote that the original label space is very large, so we grouped all the original labels into Supported, Refuted, and Unsure based on the following guidelines: \n1. We grouped labels like 'mostly true', 'partially true' into 'Supported'. Here is all the original labels mapped to 'Supported': 'a little baloney', 'accurate', 'authorship confirmed!', 'conclusion: accurate', 'confirmed authorship!', 'correct', 'correct attribution', 'correct attribution!', 'determination: mostly true', 'determination: true', 'fact', 'factscan score: true', 'half true', 'half-true', 'in-the-green', 'mostly true', 'mostly truth!', 'mostly-correct', 'mostly_true', 'no flip', 'outdated', 'partially true', 'partly true', 'true', 'truth!', 'verdict: true', 'verified'.\n2. We grouped labels like 'mostly false', 'partially false' into 'Refuted'. Here is all the original labels mapped to 'Refuted': 'a lot of baloney', 'cherry picks', 'conclusion: false', 'determination: barely true', 'determination: false', 'determination: huckster propaganda', 'determination: misleading', 'disputed!', 'distorts the facts', 'exaggerated', 'exaggerates', 'factscan score: false', 'factscan score: misleading', 'fake', 'false', 'fiction', 'fiction!', 'full flop', 'half flip', 'in-the-red', 'inaccurate attribution!', 'incorrect', 'incorrect attribution!', 'legend', 'misattributed', 'miscaptioned', 'misleading', 'misleading!', 'mixture', 'mostly false', 'mostly fiction!', 'mostly_false', 'not the whole story', 'pants on fire!', 'scam', 'scam!', 'some baloney', 'spins the facts', 'understated', 'unsupported', 'verdict: false', 'we rate this claim false'\n3. Here is all the labels mapped to 'Unsure': 'conclusion: unclear', 'in-between', 'no evidence', 'unobservable', 'unproven', 'unproven!', 'unverified', 'verdict: unsubstantiated'. \n I will ask you to output in two rounds. In the first round, you need to output the process of analyzing the claim and the evidences as a fact checker, and in the second round, you need to output the final classification decision based on your analysis."
 
-    system_instruction_2 = "Now, this is the second round. Based on the above analysis you have done, output your final classification decision in only one token. Your response should be one of the following: 'Supported', 'Refuted', or 'Unsure'."
+    user_instruction_1 = "\nNow, this is the first round. Please analyze the claim and the evidences as a fact checker and output the process of your analysis."
+
+    user_instruction_2 = "Now, this is the second round. Based on the above analysis you have done, output your final classification decision in only one token. Your response should be one of the following: 'Supported', 'Refuted', or 'Unsure'."
 
     # load json file ./data/MultiFC/dev_prompt_data_v1.0.json
     with open('./data/MultiFC/dev_prompt_data_v1.0.json', 'r') as f:
@@ -54,19 +56,19 @@ def main(
         dialogs_1: List[Dialog] = [
             [
                 {"role": "system", "content": system_instruction_1},
-                {"role": "user", "content": batch[0]['prompt']},
+                {"role": "user", "content": batch[0]['prompt'] + user_instruction_1},
             ],
             [
                 {"role": "system", "content": system_instruction_1},
-                {"role": "user", "content": batch[1]['prompt']},
+                {"role": "user", "content": batch[1]['prompt'] + user_instruction_1},
             ],
             [
                 {"role": "system", "content": system_instruction_1},
-                {"role": "user", "content": batch[2]['prompt']},
+                {"role": "user", "content": batch[2]['prompt'] + user_instruction_1},
             ],
             [
                 {"role": "system", "content": system_instruction_1},
-                {"role": "user", "content": batch[3]['prompt']},
+                {"role": "user", "content": batch[3]['prompt'] + user_instruction_1},
             ],
         ]
         results_1 = generator.chat_completion_with_factcheck_labels(
@@ -82,27 +84,27 @@ def main(
         dialogs_2: List[Dialog] = [
             [
                 {"role": "system", "content": system_instruction_1},
-                {"role": "user", "content": batch[0]['prompt']},
-                results_1[0], 
-                {"role": "system", "content": system_instruction_2}, 
+                {"role": "user", "content": batch[0]['prompt'] + user_instruction_1},
+                results_1[0]["generation"], 
+                {"role": "user", "content": user_instruction_2}, 
             ],
             [
                 {"role": "system", "content": system_instruction_1},
-                {"role": "user", "content": batch[1]['prompt']},
-                results_1[1], 
-                {"role": "system", "content": system_instruction_2}, 
+                {"role": "user", "content": batch[1]['prompt'] + user_instruction_1},
+                results_1[1]["generation"], 
+                {"role": "user", "content": user_instruction_2}, 
             ],
             [
                 {"role": "system", "content": system_instruction_1},
-                {"role": "user", "content": batch[2]['prompt']},
-                results_1[2], 
-                {"role": "system", "content": system_instruction_2}, 
+                {"role": "user", "content": batch[2]['prompt'] + user_instruction_1},
+                results_1[2]["generation"], 
+                {"role": "user", "content": user_instruction_2}, 
             ],
             [
                 {"role": "system", "content": system_instruction_1},
-                {"role": "user", "content": batch[3]['prompt']},
-                results_1[3], 
-                {"role": "system", "content": system_instruction_2}, 
+                {"role": "user", "content": batch[3]['prompt'] + user_instruction_1},
+                results_1[3]["generation"], 
+                {"role": "user", "content": user_instruction_2}, 
             ],
         ]
         results_2 = generator.chat_completion_with_factcheck_labels(
@@ -168,11 +170,29 @@ def main(
         dev_data[i+2]['generation'] = results_1[2]['generation']['content']
         dev_data[i+3]['generation'] = results_1[3]['generation']['content']
 
+        # save the classification text from results_2 to the dev_data
+        dev_data[i]['classification_generation'] = results_2[0]['generation']['content']
+        dev_data[i+1]['classification_generation'] = results_2[1]['generation']['content']
+        dev_data[i+2]['classification_generation'] = results_2[2]['generation']['content']
+        dev_data[i+3]['classification_generation'] = results_2[3]['generation']['content']
 
-        # save dev_data to a file
-        with open('./data/MultiFC/dev_prompt_data_v1.0_generated_AddMappingRules_explanation_classification.json', 'w') as f:
-            json.dump(dev_data, f, ensure_ascii=False, indent=4)
+        # print("dialogs_2[0]:\n")
+        # for item in dialogs_2[0]:
+        #     print(item)
+        # print("results_2[0]:\n")
+        # for key in results_2[0]:
+        #     print(key, results_2[0][key])
+        # print('-----------------------------------')
+        # print("dev_data[i]:\n")
+        # for key in dev_data[i]:
+        #     print(key, dev_data[i][key])
+        # exit()
+
+
+    # save dev_data to a file
+    with open('./data/MultiFC/dev_prompt_data_v1.0_generated_AddMappingRules_explanation_classification.json', 'w') as f:
+        json.dump(dev_data, f, ensure_ascii=False, indent=4)
 
 
 if __name__ == "__main__":
-    fire.Fire(main)d
+    fire.Fire(main)
